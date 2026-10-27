@@ -106,6 +106,11 @@ resource "appsignal_status_page" "test" {
 				),
 			},
 			{
+				// AppSignal drops unknown monitor ids silently; the provider reports them.
+				Config:      cfg("Our status", "threshold = 1\n  uptime_monitor_ids = [\"000000000000000000000000\"]"),
+				ExpectError: regexp.MustCompile(`Unknown uptime monitors`),
+			},
+			{
 				PreConfig: func() {
 					if err := testClient().DeleteStatusPage(context.Background(), org, first); err != nil {
 						t.Fatal(err)

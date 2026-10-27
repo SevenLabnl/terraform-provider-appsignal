@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"regexp"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -97,6 +98,31 @@ func (m *statusPageModel) fill(p *client.StatusPage) {
 	m.Threshold = types.Int64Value(p.Threshold)
 }
 
+// ignoredMonitors lists sent monitor ids that AppSignal dropped: it ignores ids it does
+// not know instead of failing.
+func ignoredMonitors(sent, got []string) []string {
+	kept := map[string]bool{}
+	for _, id := range got {
+		kept[id] = true
+	}
+	var ignored []string
+	for _, id := range sent {
+		if !kept[id] {
+			ignored = append(ignored, id)
+		}
+	}
+	return ignored
+}
+
+func checkMonitors(sent []string, got *client.StatusPage, diags interface {
+	AddAttributeError(path.Path, string, string)
+}) {
+	if ignored := ignoredMonitors(sent, got.UptimeMonitorIDs); len(ignored) > 0 {
+		diags.AddAttributeError(path.Root("uptime_monitor_ids"), "Unknown uptime monitors",
+			"AppSignal left out "+strings.Join(ignored, ", ")+": no uptime monitor with that id in this organization.")
+	}
+}
+
 func (r *statusPageResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan statusPageModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -110,6 +136,7 @@ func (r *statusPageResource) Create(ctx context.Context, req resource.CreateRequ
 		resp.Diagnostics.AddError("Creating AppSignal status page", err.Error())
 		return
 	}
+	checkMonitors(p.UptimeMonitorIDs, got, &resp.Diagnostics)
 	plan.fill(got)
 	plan.UptimeMonitorIDs = stringValueSet(got.UptimeMonitorIDs, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
@@ -150,6 +177,7 @@ func (r *statusPageResource) Update(ctx context.Context, req resource.UpdateRequ
 		resp.Diagnostics.AddError("Updating AppSignal status page", err.Error())
 		return
 	}
+	checkMonitors(p.UptimeMonitorIDs, got, &resp.Diagnostics)
 	plan.fill(got)
 	plan.UptimeMonitorIDs = stringValueSet(got.UptimeMonitorIDs, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
