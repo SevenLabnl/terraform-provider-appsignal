@@ -44,6 +44,9 @@ resource "appsignal_uptime_monitor" "homepage" {
 | `appsignal_dashboard_timeseries` | a graph of metrics over time on a dashboard |
 | `appsignal_dashboard_number` | a single-number tile on a dashboard |
 | `appsignal_check_in` | a cron or heartbeat check-in monitor |
+| `appsignal_log_filter` | drops matching log lines at ingestion |
+| `appsignal_log_metric` | turns matching log lines into metrics |
+| `appsignal_log_action_order` | the order log filters, metrics and log triggers run in |
 
 | Data source | |
 |---|---|
@@ -64,6 +67,8 @@ Full reference in [`docs/`](./docs).
 - **Most input is stored unchecked.** AppSignal accepts unknown formats, negative
   durations and log queries that never match; the provider rejects what it can at plan
   time, but check a log query in the log viewer before relying on it.
+- **Log actions run in order and new ones are added last.** Use
+  `appsignal_log_action_order` when a filter has to run before a metric or trigger.
 - **Dashboard-wide visual tags are not supported.** AppSignal fails with an internal
   error when a graph has them, so put tags on each metric instead.
 - **Uptime checks run every minute with a 30 second timeout and expect a 2xx.** None of
