@@ -38,6 +38,8 @@ resource "appsignal_uptime_monitor" "homepage" {
 | `appsignal_app` | an app in one environment |
 | `appsignal_log_source` | a log source in an app, with its ingestion key |
 | `appsignal_uptime_monitor` | an uptime monitor |
+| `appsignal_trigger` | a metric trigger (anomaly detection) |
+| `appsignal_log_trigger` | a trigger on log lines matching a query |
 
 | Data source | |
 |---|---|
@@ -53,6 +55,11 @@ Full reference in [`docs/`](./docs).
   flow there) and refer to them with the `appsignal_notifier` data source.
 - **Apps cannot be renamed.** Changing `name` or `environment` replaces the app, and
   destroying an app deletes its data. Consider `prevent_destroy`.
+- **Triggers are immutable.** Every change to an `appsignal_trigger` archives it and
+  creates a new version with a new id, which closes the alerts open on the old one.
+- **Most input is stored unchecked.** AppSignal accepts unknown formats, negative
+  durations and log queries that never match; the provider rejects what it can at plan
+  time, but check a log query in the log viewer before relying on it.
 - **Uptime checks run every minute with a 30 second timeout and expect a 2xx.** None of
   that is configurable.
 
