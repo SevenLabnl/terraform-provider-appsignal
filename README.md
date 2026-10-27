@@ -43,6 +43,7 @@ resource "appsignal_uptime_monitor" "homepage" {
 | `appsignal_dashboard` | a dashboard |
 | `appsignal_dashboard_timeseries` | a graph of metrics over time on a dashboard |
 | `appsignal_dashboard_number` | a single-number tile on a dashboard |
+| `appsignal_check_in` | a cron or heartbeat check-in monitor |
 
 | Data source | |
 |---|---|
