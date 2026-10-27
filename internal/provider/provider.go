@@ -42,7 +42,7 @@ func (p *appsignalProvider) Metadata(_ context.Context, _ provider.MetadataReque
 
 func (p *appsignalProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Manages AppSignal apps, log sources, uptime monitors, triggers, dashboards, check-ins and log actions through the AppSignal GraphQL API.",
+		Description: "Manages AppSignal apps, log sources, uptime monitors, triggers, dashboards, check-ins, log actions and status pages through the AppSignal GraphQL API.",
 		Attributes: map[string]schema.Attribute{
 			"token": schema.StringAttribute{
 				Description: "AppSignal personal API token. Defaults to the APPSIGNAL_TOKEN environment variable.",
@@ -102,6 +102,7 @@ func (p *appsignalProvider) Resources(_ context.Context) []func() resource.Resou
 		NewLogFilterResource,
 		NewLogMetricResource,
 		NewLogActionOrderResource,
+		NewStatusPageResource,
 	}
 }
 

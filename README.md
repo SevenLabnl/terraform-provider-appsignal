@@ -47,6 +47,7 @@ resource "appsignal_uptime_monitor" "homepage" {
 | `appsignal_log_filter` | drops matching log lines at ingestion |
 | `appsignal_log_metric` | turns matching log lines into metrics |
 | `appsignal_log_action_order` | the order log filters, metrics and log triggers run in |
+| `appsignal_status_page` | a public status page of the organization |
 
 | Data source | |
 |---|---|
@@ -67,6 +68,8 @@ Full reference in [`docs/`](./docs).
 - **Most input is stored unchecked.** AppSignal accepts unknown formats, negative
   durations and log queries that never match; the provider rejects what it can at plan
   time, but check a log query in the log viewer before relying on it.
+- **A status page hostname must resolve first.** AppSignal only accepts it once it has a
+  CNAME to `cname.appsignal-status.com`.
 - **Log actions run in order and new ones are added last.** Use
   `appsignal_log_action_order` when a filter has to run before a metric or trigger.
 - **Dashboard-wide visual tags are not supported.** AppSignal fails with an internal
