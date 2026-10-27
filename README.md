@@ -40,6 +40,9 @@ resource "appsignal_uptime_monitor" "homepage" {
 | `appsignal_uptime_monitor` | an uptime monitor |
 | `appsignal_trigger` | a metric trigger (anomaly detection) |
 | `appsignal_log_trigger` | a trigger on log lines matching a query |
+| `appsignal_dashboard` | a dashboard |
+| `appsignal_dashboard_timeseries` | a graph of metrics over time on a dashboard |
+| `appsignal_dashboard_number` | a single-number tile on a dashboard |
 
 | Data source | |
 |---|---|
@@ -60,6 +63,8 @@ Full reference in [`docs/`](./docs).
 - **Most input is stored unchecked.** AppSignal accepts unknown formats, negative
   durations and log queries that never match; the provider rejects what it can at plan
   time, but check a log query in the log viewer before relying on it.
+- **Dashboard-wide visual tags are not supported.** AppSignal fails with an internal
+  error when a graph has them, so put tags on each metric instead.
 - **Uptime checks run every minute with a 30 second timeout and expect a 2xx.** None of
   that is configurable.
 

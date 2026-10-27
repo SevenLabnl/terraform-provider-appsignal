@@ -153,16 +153,7 @@ func (r *triggerResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 }
 
 func (r *triggerResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var format, formatInput types.String
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("format"), &format)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("format_input"), &formatInput)...)
-	if formatInput.IsNull() || formatInput.IsUnknown() || format.IsUnknown() {
-		return
-	}
-	if format.ValueString() != "size" {
-		resp.Diagnostics.AddAttributeError(path.Root("format_input"), "format_input needs format = \"size\"",
-			"AppSignal only uses format_input for sizes.")
-	}
+	validateFormatInput(ctx, req.Config, &resp.Diagnostics)
 }
 
 func (r *triggerResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
