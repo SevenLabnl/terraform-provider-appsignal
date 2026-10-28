@@ -22,8 +22,8 @@ var protoV6Factories = map[string]func() (tfprotov6.ProviderServer, error){
 // Acceptance tests create a real app in APPSIGNAL_ORGANIZATION and delete it again.
 func preCheck(t *testing.T) {
 	t.Helper()
-	if os.Getenv("APPSIGNAL_TOKEN") == "" || os.Getenv("APPSIGNAL_ORGANIZATION") == "" {
-		t.Fatal("APPSIGNAL_TOKEN and APPSIGNAL_ORGANIZATION must be set for acceptance tests")
+	if envToken() == "" || os.Getenv("APPSIGNAL_ORGANIZATION") == "" {
+		t.Fatal("APPSIGNAL_API_TOKEN and APPSIGNAL_ORGANIZATION must be set for acceptance tests")
 	}
 }
 
@@ -124,7 +124,7 @@ func TestAccAppLogSourceAndUptimeMonitor(t *testing.T) {
 }
 
 func appIsGone(s *terraform.State) error {
-	c := client.New(os.Getenv("APPSIGNAL_ENDPOINT"), os.Getenv("APPSIGNAL_TOKEN"), "acceptance-test")
+	c := client.New(os.Getenv("APPSIGNAL_ENDPOINT"), envToken(), "acceptance-test")
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "appsignal_app" {
 			continue

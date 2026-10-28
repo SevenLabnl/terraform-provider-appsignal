@@ -14,7 +14,7 @@ terraform {
   }
 }
 
-provider "appsignal" {} # token from APPSIGNAL_TOKEN
+provider "appsignal" {} # token from APPSIGNAL_API_TOKEN
 
 resource "appsignal_app" "web" {
   organization_slug = "example"
@@ -87,7 +87,7 @@ dedicated user where you can, and keep the token in a secret store, not in code.
 
 ```bash
 go test ./...                       # unit tests, no network
-TF_ACC=1 APPSIGNAL_TOKEN=... APPSIGNAL_ORGANIZATION=... go test ./internal/provider/
+TF_ACC=1 APPSIGNAL_API_TOKEN=... APPSIGNAL_ORGANIZATION=... go test ./internal/provider/
 go generate ./...                   # regenerate docs/
 ```
 

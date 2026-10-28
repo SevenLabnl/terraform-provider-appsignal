@@ -17,7 +17,7 @@ import (
 )
 
 func testClient() *client.Client {
-	return client.New(os.Getenv("APPSIGNAL_ENDPOINT"), os.Getenv("APPSIGNAL_TOKEN"), "acceptance-test")
+	return client.New(os.Getenv("APPSIGNAL_ENDPOINT"), envToken(), "acceptance-test")
 }
 
 func appConfig(name string) string {

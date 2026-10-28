@@ -20,7 +20,7 @@ terraform {
   }
 }
 
-# The token can also come from APPSIGNAL_TOKEN.
+# The token can also come from APPSIGNAL_API_TOKEN.
 provider "appsignal" {}
 ```
 
@@ -30,4 +30,4 @@ provider "appsignal" {}
 ### Optional
 
 - `endpoint` (String) GraphQL endpoint. Defaults to APPSIGNAL_ENDPOINT, then https://appsignal.com/graphql.
-- `token` (String, Sensitive) AppSignal personal API token. Defaults to the APPSIGNAL_TOKEN environment variable.
+- `token` (String, Sensitive) AppSignal personal API token. Defaults to the APPSIGNAL_API_TOKEN environment variable, then APPSIGNAL_TOKEN.

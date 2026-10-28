@@ -6,5 +6,5 @@ terraform {
   }
 }
 
-# The token can also come from APPSIGNAL_TOKEN.
+# The token can also come from APPSIGNAL_API_TOKEN.
 provider "appsignal" {}

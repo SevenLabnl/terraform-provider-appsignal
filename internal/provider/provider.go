@@ -45,7 +45,7 @@ func (p *appsignalProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
 		Description: "Manages AppSignal apps, log sources, uptime monitors, triggers, dashboards, check-ins, log actions and status pages through the AppSignal GraphQL API.",
 		Attributes: map[string]schema.Attribute{
 			"token": schema.StringAttribute{
-				Description: "AppSignal personal API token. Defaults to the APPSIGNAL_TOKEN environment variable.",
+				Description: "AppSignal personal API token. Defaults to the APPSIGNAL_API_TOKEN environment variable, then APPSIGNAL_TOKEN.",
 				Optional:    true,
 				Sensitive:   true,
 			},
@@ -69,13 +69,13 @@ func (p *appsignalProvider) Configure(ctx context.Context, req provider.Configur
 		return
 	}
 
-	token := os.Getenv("APPSIGNAL_TOKEN")
+	token := envToken()
 	if !cfg.Token.IsNull() {
 		token = cfg.Token.ValueString()
 	}
 	if strings.TrimSpace(token) == "" {
 		resp.Diagnostics.AddAttributeError(path.Root("token"), "Missing AppSignal token",
-			"Set the provider's token argument or the APPSIGNAL_TOKEN environment variable.")
+			"Set the provider's token argument or the APPSIGNAL_API_TOKEN environment variable.")
 		return
 	}
 	endpoint := os.Getenv("APPSIGNAL_ENDPOINT")
@@ -149,4 +149,12 @@ func stringPtr(v types.String) *string {
 	}
 	s := v.ValueString()
 	return &s
+}
+
+// envToken reads the token from the environment. APPSIGNAL_TOKEN is what v0.1.0 read.
+func envToken() string {
+	if t := os.Getenv("APPSIGNAL_API_TOKEN"); t != "" {
+		return t
+	}
+	return os.Getenv("APPSIGNAL_TOKEN")
 }
