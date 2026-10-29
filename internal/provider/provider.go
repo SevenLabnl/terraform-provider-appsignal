@@ -109,6 +109,7 @@ func (p *appsignalProvider) Resources(_ context.Context) []func() resource.Resou
 func (p *appsignalProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewOrganizationDataSource,
+		NewHostedCollectorDataSource,
 		NewAppDataSource,
 		NewNotifierDataSource,
 	}

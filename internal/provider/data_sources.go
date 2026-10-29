@@ -231,3 +231,82 @@ func (d *notifierDataSource) Read(ctx context.Context, req datasource.ReadReques
 	resp.Diagnostics.AddError("AppSignal notifier not found", fmt.Sprintf("App %s has no notifier named %q. It has: %s.",
 		m.AppID.ValueString(), m.Name.ValueString(), strings.Join(names, ", ")))
 }
+
+// ---------------------------------------------------------------- hosted collector
+
+func NewHostedCollectorDataSource() datasource.DataSource { return &hostedCollectorDataSource{} }
+
+type hostedCollectorDataSource struct{ client *client.Client }
+
+type hostedCollectorModel struct {
+	OrganizationSlug types.String `tfsdk:"organization_slug"`
+	ID               types.String `tfsdk:"id"`
+	URL              types.String `tfsdk:"url"`
+	Subdomain        types.String `tfsdk:"subdomain"`
+	Region           types.String `tfsdk:"region"`
+	Status           types.String `tfsdk:"status"`
+	IsDefault        types.Bool   `tfsdk:"is_default"`
+	Experimental     types.Bool   `tfsdk:"experimental"`
+}
+
+func (d *hostedCollectorDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_hosted_collector"
+}
+
+func (d *hostedCollectorDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		Description: "An OpenTelemetry collector that AppSignal hosts for the organization, looked up by id, " +
+			"or the organization's default one when id is left out.",
+		Attributes: map[string]schema.Attribute{
+			"organization_slug": schema.StringAttribute{Required: true},
+			"id": schema.StringAttribute{
+				Description: "Leave out for the organization's default hosted collector.", Optional: true, Computed: true,
+			},
+			"url": schema.StringAttribute{
+				Description: "Base URL that OTLP/HTTP exporters send to; signals go to `/v1/traces`, `/v1/metrics` and `/v1/logs`.",
+				Computed:    true,
+			},
+			"subdomain":    schema.StringAttribute{Computed: true},
+			"region":       schema.StringAttribute{Computed: true},
+			"status":       schema.StringAttribute{Description: "Such as `provisioned`.", Computed: true},
+			"is_default":   schema.BoolAttribute{Computed: true},
+			"experimental": schema.BoolAttribute{Description: "Whether it runs AppSignal's experimental build.", Computed: true},
+		},
+	}
+}
+
+func (d *hostedCollectorDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	d.client = clientFrom(req.ProviderData, &resp.Diagnostics)
+}
+
+func (d *hostedCollectorDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var m hostedCollectorModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &m)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	all, err := d.client.ListHostedCollectors(ctx, m.OrganizationSlug.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Reading AppSignal hosted collectors", err.Error())
+		return
+	}
+	for _, c := range all {
+		if (m.ID.IsNull() && c.IsDefault) || c.ID == m.ID.ValueString() {
+			m.ID = types.StringValue(c.ID)
+			m.URL = types.StringValue(c.URL)
+			m.Subdomain = types.StringValue(c.Subdomain)
+			m.Region = types.StringValue(c.Region)
+			m.Status = types.StringValue(c.Status)
+			m.IsDefault = types.BoolValue(c.IsDefault)
+			m.Experimental = types.BoolValue(c.Experimental)
+			resp.Diagnostics.Append(resp.State.Set(ctx, &m)...)
+			return
+		}
+	}
+	what := "no default hosted collector"
+	if !m.ID.IsNull() {
+		what = fmt.Sprintf("no hosted collector %q", m.ID.ValueString())
+	}
+	resp.Diagnostics.AddError("AppSignal hosted collector not found",
+		fmt.Sprintf("Organization %q has %s.", m.OrganizationSlug.ValueString(), what))
+}
