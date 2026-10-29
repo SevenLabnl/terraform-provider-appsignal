@@ -215,3 +215,28 @@ func (c *Client) DeleteUptimeMonitor(ctx context.Context, appID, id string) erro
 	return c.Do(ctx, `mutation($app: String!, $id: String!) { deleteUptimeMonitor(appId: $app, id: $id) { id } }`,
 		map[string]any{"app": appID, "id": id}, nil)
 }
+
+type HostedCollector struct {
+	ID           string `json:"id"`
+	URL          string `json:"url"`
+	Subdomain    string `json:"subdomain"`
+	Region       string `json:"region"`
+	Status       string `json:"status"`
+	IsDefault    bool   `json:"isDefault"`
+	Experimental bool   `json:"experimental"`
+}
+
+func (c *Client) ListHostedCollectors(ctx context.Context, organizationSlug string) ([]HostedCollector, error) {
+	var out struct {
+		Organization *struct{ HostedCollectors []HostedCollector }
+	}
+	if err := c.Do(ctx, `query($slug: String!) { organization(slug: $slug) {
+		hostedCollectors { id url subdomain region status isDefault experimental } } }`,
+		map[string]any{"slug": organizationSlug}, &out); err != nil {
+		return nil, err
+	}
+	if out.Organization == nil {
+		return nil, &Error{Messages: []string{"Object not found."}}
+	}
+	return out.Organization.HostedCollectors, nil
+}
