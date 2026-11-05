@@ -112,6 +112,7 @@ func (p *appsignalProvider) DataSources(_ context.Context) []func() datasource.D
 		NewHostedCollectorDataSource,
 		NewAppDataSource,
 		NewNotifierDataSource,
+		NewUptimeMonitorDataSource,
 	}
 }
 
