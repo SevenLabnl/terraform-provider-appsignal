@@ -183,6 +183,21 @@ func (c *Client) GetUptimeMonitor(ctx context.Context, appID, id string) (*Uptim
 	return out.App.UptimeMonitor, nil
 }
 
+// ListUptimeMonitors returns every uptime monitor of the app.
+func (c *Client) ListUptimeMonitors(ctx context.Context, appID string) ([]UptimeMonitor, error) {
+	var out struct {
+		App *struct{ UptimeMonitors []UptimeMonitor }
+	}
+	if err := c.Do(ctx, `query($app: String!) { app(id: $app) { uptimeMonitors { `+uptimeMonitorFields+` } } }`,
+		map[string]any{"app": appID}, &out); err != nil {
+		return nil, err
+	}
+	if out.App == nil {
+		return nil, &Error{Messages: []string{"Object not found."}}
+	}
+	return out.App.UptimeMonitors, nil
+}
+
 func (c *Client) CreateUptimeMonitor(ctx context.Context, appID string, m UptimeMonitor) (*UptimeMonitor, error) {
 	var out struct{ CreateUptimeMonitor *UptimeMonitor }
 	err := c.Do(ctx, `mutation($app: String!, $m: UptimeMonitorInput!) {
