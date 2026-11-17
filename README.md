@@ -37,6 +37,7 @@ resource "appsignal_uptime_monitor" "homepage" {
 |---|---|
 | `appsignal_app` | an app in one environment |
 | `appsignal_log_source` | a log source in an app, with its ingestion key |
+| `appsignal_log_view` | a saved view in the log viewer |
 | `appsignal_uptime_monitor` | an uptime monitor |
 | `appsignal_trigger` | a metric trigger (anomaly detection) |
 | `appsignal_log_trigger` | a trigger on log lines matching a query |
@@ -74,6 +75,8 @@ Full reference in [`docs/`](./docs).
   `appsignal_log_action_order` when a filter has to run before a metric or trigger.
 - **Dashboard-wide visual tags are not supported.** AppSignal fails with an internal
   error when a graph has them, so put tags on each metric instead.
+- **A log source made through the API gets no log view.** The UI adds one for each new
+  source; add an `appsignal_log_view` to see the source as its own view.
 - **Uptime checks run every minute with a 30 second timeout and expect a 2xx.** None of
   that is configurable.
 

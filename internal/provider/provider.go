@@ -92,6 +92,7 @@ func (p *appsignalProvider) Resources(_ context.Context) []func() resource.Resou
 	return []func() resource.Resource{
 		NewAppResource,
 		NewLogSourceResource,
+		NewLogViewResource,
 		NewUptimeMonitorResource,
 		NewTriggerResource,
 		NewLogTriggerResource,
